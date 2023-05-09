@@ -1,7 +1,7 @@
 # api-laravel
 # cd /Applications/XAMPP/htdocs/api-laravel
 # php artisan serve
-# step: Fazendo o não auteticado
+# step: Populando com barbeiros aleatórios -> ERROR
 
 #### Config PHP intelephense 👇🏽
 
