@@ -38,15 +38,12 @@ class ProfessionalController extends Controller
                 'Eu tive uma experiência incrível na clínica de estética! Desde o momento em que entrei,
                 fui recebida com um sorriso caloroso e uma atenção impecável dos funcionários.
                 Eles foram muito atenciosos e prestativos em responder todas as minhas perguntas e me ajudaram a escolher
-                o melhor tratamento para as minhas necessidades.
-                O profissional que realizou o meu tratamento foi excepcional!
-                Ele explicou cada passo do processo com muita clareza e habilidade,
-                e me fez sentir confortável e confiante durante todo o tempo'
+                o melhor tratamento para as minhas necessidades.'
             ];
 
             $newProfessional = new Professional();
             $newProfessional->name = $names[rand(0, count($names)-1)].' '.$lastnames[rand(0, count($lastnames)-1)];
-            $newProfessional->avatar = rand(1, 4).'png';
+            $newProfessional->avatar = rand(1, 4).'.png';
             $newProfessional->stars = rand(2, 4).'.'.rand(0, 9);
             $newProfessional->latitude = '-23.5'.rand(0, 9).'30907';
             $newProfessional->longitude = '-46.6'.rand(0, 9).'82795';
@@ -77,7 +74,7 @@ class ProfessionalController extends Controller
                 $newProfessionalTestimonial->professional_id = $newProfessional->id;
                 $newProfessionalTestimonial->name = $names[rand(0, count($names)-1)].' '.$lastnames[rand(0, count($lastnames)-1)];
                 $newProfessionalTestimonial->rate = rand(2, 4).'.'.rand(0, 9);
-                $newProfessionalTestimonial->body = $depos[rand(0, count($depos)-1)].' '.$depos[rand(0, count($depos)-1)];
+                $newProfessionalTestimonial->body = $depos[rand(0, count($depos)-1)];//.' '.$depos[rand(0, count($depos)-1)]
                 $newProfessionalTestimonial->save();
             }
 
@@ -85,7 +82,7 @@ class ProfessionalController extends Controller
             {
                 $rAdd = rand(7, 10);
                 $hours = [];
-                for($r=0; $r < 8; $e++)
+                for($r=0; $r < 8; $r++)
                 {
                     $time = $r + $rAdd;
                     if($time < 10)
