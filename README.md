@@ -1,7 +1,7 @@
 # api-laravel
 # cd /Applications/XAMPP/htdocs/api-laravel
 # php artisan serve
-# step: Populando com barbeiros aleatórios -> ERROR
+# step: Pegando a Key do Google Maps Geocoding
 
 #### Config PHP intelephense 👇🏽
 
