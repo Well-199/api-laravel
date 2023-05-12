@@ -1,7 +1,7 @@
 # api-laravel
 # cd /Applications/XAMPP/htdocs/api-laravel
 # php artisan serve
-# step: Pegando a Key do Google Maps Geocoding
+# step: Criando paginação
 
 #### Config PHP intelephense 👇🏽
 
