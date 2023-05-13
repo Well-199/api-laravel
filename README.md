@@ -1,7 +1,8 @@
 # api-laravel
 # cd /Applications/XAMPP/htdocs/api-laravel
 # php artisan serve
-# step: Criando paginação
+# step: Pegando um barbeiro (2/3)
+
 
 #### Config PHP intelephense 👇🏽
 

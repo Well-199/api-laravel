@@ -45,6 +45,12 @@ class ProfessionalController extends Controller
         $lat = $request->input('lat');
         $lng = $request->input('lng');
         $city = $request->input('city');
+        $offset = $request->input('offset');
+
+        if(!$offset)
+        {
+            $offset = 0;
+        }
 
         if(!empty($city))
         {
@@ -55,16 +61,15 @@ class ProfessionalController extends Controller
                 $lat = $res['results'][0]['geometry']['location']['lat'];
                 $lng = $res['results'][0]['geometry']['location']['lng'];
             }
-        } elseif(!empty($lat) && !empty($lng))
-        {
+        } elseif(!empty($lat) && !empty($lng)) {
+
             $res = $this->searchGeo($lat.','.$lng);
 
             if(count($res['results']) > 0)
             {
                 $city = $res['results'][0]['formatted_address'];
             }
-        } else
-        {
+        } else {
             $lat = '-23.5930907';
             $lng = '-46.6182795';
             $city = 'São Paulo';
@@ -77,6 +82,8 @@ class ProfessionalController extends Controller
             POW(69.1 * (latitude - '.$lat.'), 2) +
             POW(69.1 * ('.$lng.' - longitude) * COS(latitude / 57.3), 2)) < ?', [10])
             ->orderBy('distance', 'ASC')
+            ->offset($offset)
+            ->limit(5)
             ->get();
 
         foreach($professional as $bkey => $bvalue)
@@ -86,6 +93,57 @@ class ProfessionalController extends Controller
 
         $array['data'] = $professional;
         $array['loc'] = 'São Paulo';
+
+        return $array;
+    }
+
+    public function one($id)
+    {
+        $array = ['error' => ''];
+
+        $professional = Professional::find($id);
+
+        if($professional)
+        {
+
+            $professional['avatar'] = url('media/avatars/'.$professional['avatar']);
+            $professional['favorited'] = false;
+            $professional['photos'] = [];
+            $professional['services'] = [];
+            $professional['testimonials'] = [];
+            $professional['available'] = [];
+
+            // Pegando as fotos do Profissional
+            $professional['photos'] = ProfessionalPhotos::select(['id', 'url'])
+                ->where('professional_id', $professional->id)
+                ->get();
+
+            foreach($professional['photos'] as $pfkey => $pfvalue)
+            {
+                $professional['photos'][$pfkey]['url'] = url('media/uploads/'.$professional['photos'][$pfkey]['url']);
+            }
+
+            // Pegando os serviços do Profissional
+            $professional['services'] = ProfessionalServices::select(['id', 'name', 'price'])
+                ->where('professional_id', $professional->id)
+                ->get();
+
+            // Pegando os depoimentos
+            $professional['testimonials'] = ProfessionalTestimonial::select(['id', 'name', 'rate', 'body'])
+                ->where('professional_id', $professional->id)
+                ->get();
+
+            // Pegando disponibilidade do Professional
+
+
+
+
+            $array['data'] = $professional;
+
+        } else {
+            $array['error'] = 'Professional não existe';
+            return $array;
+        }
 
         return $array;
     }
