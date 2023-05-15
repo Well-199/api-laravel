@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 use App\Models\User;
+use App\Models\UserAppointment;
+use App\Models\UserFavorite;
 use App\Models\Professional;
 use App\Models\ProfessionalPhotos;
 use App\Models\ProfessionalServices;
@@ -113,6 +115,16 @@ class ProfessionalController extends Controller
             $professional['testimonials'] = [];
             $professional['available'] = [];
 
+            // Verificando favorito
+            $cFavorite = UserFavorite::where('user_id', $this->loggedUser->id)
+                ->where('professional_id', $professional->id)
+                ->count();
+
+            if($cFavorite > 0)
+            {
+                $professional['favorited'] = true;
+            }
+
             // Pegando as fotos do Profissional
             $professional['photos'] = ProfessionalPhotos::select(['id', 'url'])
                 ->where('professional_id', $professional->id)
@@ -134,15 +146,115 @@ class ProfessionalController extends Controller
                 ->get();
 
             // Pegando disponibilidade do Professional
+            $availability = [];
 
+            // Pega todos os agendamentos de um professional
+            $avails = ProfessionalAvailability::where('professional_id', $professional->id)->get();
 
+            $availWeekdays = [];
 
+            foreach($avails as $item)
+            {
+                $availWeekdays[$item['weekday']] = explode(',', $item['hours']);
+            }
+
+            // Pega os agendamentos dos proximos 20 dias
+            $appointments = [];
+
+            $appQuery = UserAppointment::where('professional_id', $professional->id)
+                ->whereBetween('ap_datetime', [
+                    date('Y-m-d').' 00:00:00',
+                    date('Y-m-d', strtotime('+20 days')).' 23:59:59'
+                ])
+                ->get();
+
+            foreach($appQuery as $appItem)
+            {
+                $appointments[] = $appItem['ap_datetime'];
+            }
+
+            // Gerar disponibilidade real
+            for($q=0; $q<20; $q++)
+            {
+                $timeItem = strtotime('+'.$q.' days');
+                $weekday = date('w', $timeItem);
+
+                if(in_array($weekday, array_keys($availWeekdays)))
+                {
+                    $hours = [];
+
+                    $dayItem = date('Y-m-d', $timeItem);
+
+                    foreach($availWeekdays[$weekday] as $hourItem)
+                    {
+                        $dayFormated = $dayItem.' '.$hourItem.':00';
+
+                        if(!in_array($dayFormated, $appointments))
+                        {
+                            $hours[] = $hourItem;
+                        }
+                    }
+
+                    if(count($hours) > 0)
+                    {
+                        $availability[] = [
+                            'date' => $dayItem,
+                            'hours' => $hours
+                        ];
+                    }
+                }
+
+            }
+
+            $professional['available'] = $availability;
 
             $array['data'] = $professional;
 
         } else {
             $array['error'] = 'Professional não existe';
             return $array;
+        }
+
+        return $array;
+    }
+
+    public function setAppointment($id, Request $request)
+    {
+        $array = ['error'=>''];
+
+        $service = $request->input('service');
+        $year = intval($request->input('year'));
+        $month = intval($request->input('month'));
+        $day = intval($request->input('day'));
+        $hour = intval($request->input('hour'));
+
+        $month = ($month < 10) ? '0'.$month : $month;
+        $day = ($day < 10) ? '0'.$day : $day;
+        $hour = ($hour < 10) ? '0'.$hour : $hour;
+
+        // 1. verificar se o serviço do profissional existe
+        $professionalservice = ProfessionalServices::select()
+            ->where('id', $service)
+            ->where('professional_id', $id)
+            ->first();
+
+        if($professionalservice)
+        {
+            // 2. verificar se a data é uma data valida
+            $appDate = $year.'-'.$month.'-'.$day.' '.$hour.':00:00';
+
+            if(strtotime($appDate) > 0)
+            {
+                // 3. verificar se o profissional ja possui agendamento nesse dia e hora
+                // 4. verificar se o profissional atende nesta data/hora
+                // 5. fazer o agendamento
+
+            } else {
+                $array['error'] = 'Data inválida';
+            }
+
+        } else {
+            $array['error'] = 'Serviço inexistente';
         }
 
         return $array;
