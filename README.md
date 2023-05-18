@@ -1,7 +1,7 @@
 # api-laravel
 # cd /Applications/XAMPP/htdocs/api-laravel
 # php artisan serve
-# step: Favoritar um barbeiro
+# step: Buscando barbeiros
 
 
 #### Config PHP intelephense 👇🏽
