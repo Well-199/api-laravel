@@ -1,7 +1,7 @@
 # api-laravel
 # cd /Applications/XAMPP/htdocs/api-laravel
 # php artisan serve
-# step: Finalizando o agendamento (2/2)
+# step: Favoritar um barbeiro
 
 
 #### Config PHP intelephense 👇🏽

@@ -241,22 +241,55 @@ class ProfessionalController extends Controller
         if($professionalservice)
         {
             // 2. verificar se a data é uma data valida
-            $appDate = $year.'-'.$month.'-'.$day.' '.$hour.':00:00';
+            $apDate = $year.'-'.$month.'-'.$day.' '.$hour.':00:00';
 
-            if(strtotime($appDate) > 0)
+            if(strtotime($apDate) > 0)
             {
                 // 3. verificar se o profissional ja possui agendamento nesse dia e hora
-                // 4. verificar se o profissional atende nesta data/hora
-                // 5. fazer o agendamento
+                $apps = UserAppointment::select()
+                    ->where('professional_id', $id)
+                    ->where('ap_datetime', $apDate)
+                ->count();
 
+                if($apps === 0)
+                {
+                    // 4. verificar se o profissional atende nesta data/hora
+                    $weekday = date('w', strtotime($apDate));
+                    $avail = ProfessionalAvailability::select()
+                        ->where('professional_id', $id)
+                        ->where('weekday', $weekday)
+                    ->first();
+
+                    if($avail)
+                    {
+                        // 5. Verificar se o professional atende nessa hora
+                        $hours = explode(',', $avail['hours']);
+
+                        if(in_array($hour.':00', $hours))
+                        {
+                            // 6. fazer o agendamento
+                            $newApp = new UserAppointment();
+                            $newApp->user_id = $this->loggedUser->id;
+                            $newApp->professional_id = $id;
+                            $newApp->service_id = $service;
+                            $newApp->ap_datetime = $apDate;
+                            $newApp->save();
+
+                        } else {
+                            $array['error'] = 'Professional não atende nesta hora';
+                        }
+                    } else {
+                        $array['error'] = 'Profissional não atende neste dia';
+                    }
+                } else {
+                    $array['error'] = 'Já possui agendamento neste dia/hora';
+                }
             } else {
                 $array['error'] = 'Data inválida';
             }
-
         } else {
             $array['error'] = 'Serviço inexistente';
         }
-
         return $array;
     }
 }
