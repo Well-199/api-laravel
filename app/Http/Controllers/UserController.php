@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\UserAppointment;
 use App\Models\UserFavorite;
 use App\Models\Professional;
+use App\Models\ProfessionalServices;
 
 class UserController extends Controller
 {
@@ -79,6 +81,37 @@ class UserController extends Controller
                 $professional = Professional::find($fav['professional_id']);
                 $professional['avatar'] = url('media/avatars/'.$professional['avatar']);
                 $array['list'][] = $professional;
+            }
+        }
+
+        return $array;
+    }
+
+    public function getAppoitments()
+    {
+        $array = ['error' => '', 'list' => []];
+
+        $apps = UserAppointment::select()
+            ->where('user_id', $this->loggedUser->id)
+            ->orderBy('ap_datetime', 'DESC')
+        ->get();
+
+        if($apps)
+        {
+            foreach($apps as $app)
+            {
+                $professional = Professional::find($app['professional_id']);
+                $professional['avatar'] = url('media/avatars/'.$professional['avatar']);
+
+                $service = ProfessionalServices::find($app['service_id']);
+
+                $array['list'][] = [
+                    'id' => $app['id'],
+                    'datetime' => $app['ap_datetime'],
+                    'professional' => $professional,
+                    'service' => $service
+                ];
+
             }
         }
 
