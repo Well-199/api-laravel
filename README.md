@@ -1,7 +1,7 @@
 # api-laravel
-# cd /Applications/XAMPP/htdocs/api-laravel
-# php artisan serve
-# step: Editando o avatar do usuário
+#### cd /Applications/XAMPP/htdocs/api-laravel
+#### php artisan serve
+#### step: Editando o avatar do usuário
 
 
 #### Config PHP intelephense 👇🏽
