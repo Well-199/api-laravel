@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
+use Intervention\Image\Facades\Image;
+
 use App\Models\User;
 use App\Models\UserAppointment;
 use App\Models\UserFavorite;
@@ -158,6 +160,44 @@ class UserController extends Controller
             $user->password = password_hash($password, PASSWORD_DEFAULT);
         }
 
+        $user->save();
+
+        return $array;
+    }
+
+    public function updadeAvatar(Request $request)
+    {
+        $array = ['error' => ''];
+
+        $rules = ['avatar' => 'required|image|mimes:png,jpg,jpeg'];
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if($validator->fails())
+        {
+            $array['error'] = $validator->messages();
+            return $array;
+        }
+
+        // recebe o avatar com o parametro 'avatar'
+        $avatar = $request->file('avatar');
+
+        // caminho da pasta de destino da imagem
+        $dest = public_path('/media/avatars');
+
+        // gera um hash e concatena com a extensão .jpg para renomear a imagem
+        $avatarName = md5(time().rand(0,9999)).'.jpg';
+
+        // pega o caminho real do arquivo e armazena em $img
+        $img = Image::make($avatar->getRealPath());
+
+        // redimensiona a imagem para 300 x 300 e salva na pasta de destino ja renomeado com md5
+        $img->fit(300, 300)->save($dest.'/'.$avatarName);
+        //$array['data'] = $avatar->getRealPath();
+
+        // Busca o usuario pelo id e altera o valor da propriedade avatar pra o novo avatar renomeado e salva no banco de dados
+        $user = User::find($this->loggedUser->id);
+        $user->avatar = $avatarName;
         $user->save();
 
         return $array;
